@@ -5,7 +5,7 @@ const axios = require("axios");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 // Environment variables for API keys
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -34,13 +34,16 @@ if (!OPENAI_API_KEY || !RAPID_API_KEY) {
   process.exit(1);
 }
 
+// All routes prepended with /api for Vercel deployment
+const router = express.Router();
+
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+router.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running" });
 });
 
 // Endpoint to get video transcript
-app.get("/api/transcript/:videoId", async (req, res) => {
+router.get("/transcript/:videoId", async (req, res) => {
   try {
     const { videoId } = req.params;
 
@@ -77,12 +80,10 @@ app.get("/api/transcript/:videoId", async (req, res) => {
       responseData = response.data;
 
       if (!responseData || !responseData.transcript) {
-        return res
-          .status(404)
-          .json({
-            error:
-              "No transcript or auto-generated captions found for this video",
-          });
+        return res.status(404).json({
+          error:
+            "No transcript or auto-generated captions found for this video",
+        });
       }
     }
 
@@ -104,7 +105,7 @@ app.get("/api/transcript/:videoId", async (req, res) => {
 });
 
 // Endpoint to generate a full summary
-app.post("/api/summarize/full", async (req, res) => {
+router.post("/summarize/full", async (req, res) => {
   try {
     const { transcript } = req.body;
 
@@ -146,7 +147,7 @@ app.post("/api/summarize/full", async (req, res) => {
 });
 
 // Endpoint to generate incremental summaries
-app.post("/api/summarize/incremental", async (req, res) => {
+router.post("/summarize/incremental", async (req, res) => {
   try {
     const { segments } = req.body;
 
@@ -270,7 +271,29 @@ function formatTime(seconds) {
   }
 }
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Mount the router to /api
+app.use("/api", router);
+
+// Root path handler for Vercel
+app.get("/", (req, res) => {
+  res.json({
+    message: "YouTube Summarizer API",
+    version: "1.0.0",
+    endpoints: [
+      "/api/health",
+      "/api/transcript/:videoId",
+      "/api/summarize/full",
+      "/api/summarize/incremental",
+    ],
+  });
 });
+
+// Start the server if not running on Vercel
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel serverless functions
+module.exports = app;

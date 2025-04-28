@@ -2,7 +2,8 @@ import axios from "axios";
 
 // API base URL - will be different in development vs production
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://server-p9k2wiu1z-news-guy1s-projects.vercel.app/api";
 
 export interface TranscriptSegment {
   text: string;
