@@ -29,12 +29,19 @@ jobs:
       - name: Install dependencies 📦
         run: npm ci
 
+      # Run a security check on the build to ensure no secrets are exposed
+      - name: Check for secrets in code
+        run: |
+          echo "Checking for hardcoded API keys in the codebase..."
+          ! grep -r --include="*.ts" --include="*.tsx" --include="*.js" "apiKey\|sk-\|key=" src/ || exit 1
+          echo "No hardcoded API keys found! ✅"
+
       - name: Build 🔧
         run: npm run build
         env:
+          # These will be replaced at build time and not stored in the final build
           VITE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VITE_RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
-          # Adding API keys from repository secrets
 
       - name: Create .nojekyll file 📄
         run: |

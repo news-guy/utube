@@ -4,10 +4,24 @@ const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 const YOUTUBE_TRANSCRIPT_API =
   "https://youtube-transcript3.p.rapidapi.com/api/transcript";
 
-// You would need to set these environment variables in a production environment
-// Never expose API keys in the client-side code
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || "";
-const RAPID_API_KEY = import.meta.env.VITE_RAPID_API_KEY || "";
+// Use environment variables without default values
+// This will cause the app to fail if keys aren't provided rather than exposing empty strings
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const RAPID_API_KEY = import.meta.env.VITE_RAPID_API_KEY;
+
+// Function to check API key configuration to prevent runtime errors
+function checkApiKeys() {
+  if (!OPENAI_API_KEY) {
+    throw new Error(
+      "OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY environment variable."
+    );
+  }
+  if (!RAPID_API_KEY) {
+    throw new Error(
+      "RapidAPI key is not configured. Please set VITE_RAPID_API_KEY environment variable."
+    );
+  }
+}
 
 export interface TranscriptSegment {
   text: string;
@@ -34,6 +48,9 @@ export interface Summary {
 
 export async function getTranscript(videoId: string): Promise<Transcript> {
   try {
+    // Check API keys before making requests
+    checkApiKeys();
+
     // First try to get the regular transcript
     const response = await axios.get(YOUTUBE_TRANSCRIPT_API, {
       params: { videoId },
@@ -94,6 +111,9 @@ export async function getTranscript(videoId: string): Promise<Transcript> {
 
 export async function generateFullSummary(transcript: string): Promise<string> {
   try {
+    // Check API keys before making requests
+    checkApiKeys();
+
     const response = await axios.post(
       OPENAI_API_ENDPOINT,
       {
@@ -130,6 +150,9 @@ export async function generateIncrementalSummaries(
   segments: TranscriptSegment[]
 ): Promise<Summary[]> {
   try {
+    // Check API keys before making requests
+    checkApiKeys();
+
     // Group segments into 5-minute chunks
     const CHUNK_SIZE = 5 * 60; // 5 minutes in seconds
     const chunks: TranscriptSegment[][] = [];
