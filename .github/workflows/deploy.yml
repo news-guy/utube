@@ -34,6 +34,7 @@ jobs:
         env:
           VITE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VITE_RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          # Adding API keys from repository secrets
 
       - name: Create .nojekyll file 📄
         run: |
