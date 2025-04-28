@@ -6,8 +6,8 @@ An application that uses AI to automatically summarize YouTube videos based on t
 
 The application consists of two main parts:
 
-1. **Frontend**: A React application that provides the user interface for entering YouTube video URLs and displaying summaries.
-2. **Backend**: A Node.js server that securely handles API calls to YouTube and OpenAI services.
+1. **Frontend**: A React application deployed on GitHub Pages
+2. **Backend**: A Node.js server deployed as serverless functions on Vercel
 
 ## Features
 
@@ -15,6 +15,30 @@ The application consists of two main parts:
 - Generate concise summaries of entire videos
 - Create time-stamped segment summaries for longer videos
 - Secure API key handling through backend proxy
+
+## Quick Deployment Guide
+
+For a complete deployment using GitHub Pages (frontend) and Vercel (backend):
+
+1. **Deploy the backend first:**
+
+   - Fork this repository
+   - Deploy the server directory to Vercel:
+     ```
+     cd server
+     vercel
+     ```
+   - Set the required environment variables in Vercel
+     - `OPENAI_API_KEY`
+     - `RAPID_API_KEY`
+     - `CORS_ORIGIN` (set to `https://your-username.github.io/utube`)
+
+2. **Deploy the frontend:**
+   - Set the `API_BASE_URL` secret in your GitHub repository
+     - Go to Settings > Secrets and variables > Actions
+     - Add a new repository secret named `API_BASE_URL`
+     - Set the value to your Vercel API URL (e.g., `https://your-api.vercel.app/api`)
+   - Push changes to the main branch to trigger GitHub Pages deployment
 
 ## Development Setup
 
@@ -68,36 +92,54 @@ The application consists of two main parts:
 
 4. Open your browser and navigate to `http://localhost:5173`
 
-## Deployment
+## Detailed Deployment
 
-### Backend Deployment
+### Backend Deployment on Vercel
 
-The backend server needs to be deployed to a service that supports Node.js applications, such as:
+The `server` directory contains a Vercel-ready Node.js application:
 
-- Vercel
-- Railway
-- Render
-- Heroku
-- AWS Lambda/API Gateway
+1. Deploy with Vercel CLI:
 
-Make sure to set the appropriate environment variables on your hosting provider.
+   ```
+   cd server
+   vercel login
+   vercel
+   ```
 
-### Frontend Deployment
+2. For production deployment:
 
-The frontend is configured for GitHub Pages deployment. The workflow is set up in `.github/workflows/deploy.yml`.
+   ```
+   vercel --prod
+   ```
 
-To deploy:
+3. Configure environment variables in the Vercel dashboard:
 
-1. Push changes to the main branch
-2. GitHub Actions will automatically build and deploy the site
-3. Ensure the `API_BASE_URL` secret is set in your GitHub repository settings to point to your deployed backend API
+   - `OPENAI_API_KEY` - Your OpenAI API key
+   - `RAPID_API_KEY` - Your RapidAPI key for YouTube transcripts
+   - `CORS_ORIGIN` - Your GitHub Pages URL (e.g., `https://your-username.github.io/utube`)
+
+4. Note your deployment URL, which should look like `https://your-api.vercel.app`
+
+### Frontend Deployment on GitHub Pages
+
+The frontend is automatically deployed to GitHub Pages using GitHub Actions:
+
+1. Set up the repository secret:
+
+   - Go to your GitHub repository's Settings > Secrets and variables > Actions
+   - Add a new repository secret named `API_BASE_URL`
+   - Set its value to your Vercel API URL (e.g., `https://your-api.vercel.app/api`)
+
+2. Push to the main branch or manually trigger the workflow in the Actions tab
+
+3. After deployment completes, your site will be available at `https://your-username.github.io/utube`
 
 ## Security
 
 This application uses a server-side approach to protect API keys:
 
-- API keys are stored only on the backend server as environment variables
-- The frontend makes requests to the backend server, which then makes authenticated requests to third-party APIs
+- API keys are stored only on the Vercel serverless functions as environment variables
+- The frontend makes requests to the Vercel API, which then makes authenticated requests to third-party APIs
 - No API keys are included in the frontend code or GitHub Pages deployment
 
 ## How It Works
@@ -106,18 +148,13 @@ The application follows these steps:
 
 1. User enters a YouTube URL
 2. The application extracts the video ID from the URL
-3. It fetches the transcript using the YouTube Transcript API
-4. If no transcript is available, it falls back to auto-generated captions
-5. The transcript is sent to OpenAI's GPT-4o-mini for summarization
-6. Two summaries are generated:
+3. It calls the Vercel serverless API to fetch the transcript
+4. The API fetches the transcript from YouTube Transcript API
+5. If no transcript is available, it falls back to auto-generated captions
+6. The transcript is sent to OpenAI's GPT-4o-mini for summarization via the API
+7. Two summaries are generated:
    - A complete overview of the video
    - Segment-by-segment summaries for every 5 minutes
-
-## Important Notes
-
-- This application uses client-side API calls for simplicity, which is not recommended for production use as it exposes your API keys.
-- For a production deployment, you should implement server-side API calls using serverless functions or a backend service.
-- The application attempts to use auto-generated captions when a transcript isn't available, but this may not work for all videos (e.g., those without any captions).
 
 ## License
 

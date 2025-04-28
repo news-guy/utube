@@ -36,11 +36,44 @@ This is the backend API server for the YouTube Summarizer application. It serves
 - `POST /api/summarize/full` - Generate a full summary of a transcript
 - `POST /api/summarize/incremental` - Generate timestamped summaries by segment
 
-## Deployment
+## Deployment on Vercel (Recommended)
 
-For production deployment, consider hosting this server on:
+This server is set up for simple deployment on Vercel:
 
-- Vercel
+1. Install Vercel CLI (if not already installed):
+
+   ```
+   npm install -g vercel
+   ```
+
+2. Deploy to Vercel:
+
+   ```
+   vercel
+   ```
+
+3. For production deployment:
+
+   ```
+   vercel --prod
+   ```
+
+4. Set up environment variables in the Vercel dashboard:
+
+   - Go to your project settings
+   - Add the following environment variables:
+     - `OPENAI_API_KEY`
+     - `RAPID_API_KEY`
+     - `CORS_ORIGIN` (set to your GitHub Pages URL, e.g., `https://your-username.github.io/utube`)
+
+5. Get your API URL from the Vercel dashboard or CLI output.
+
+6. Set this URL (e.g., `https://your-api.vercel.app/api`) as the `API_BASE_URL` secret in your GitHub repository.
+
+## Alternative Deployment Options
+
+You can also deploy the server on:
+
 - Railway
 - Render
 - Heroku
