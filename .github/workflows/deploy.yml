@@ -35,6 +35,11 @@ jobs:
           VITE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VITE_RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
 
+      - name: Create .nojekyll file 📄
+        run: |
+          touch dist/.nojekyll
+          echo "Created .nojekyll file"
+
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
