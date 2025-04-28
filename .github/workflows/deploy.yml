@@ -39,9 +39,8 @@ jobs:
       - name: Build 🔧
         run: npm run build
         env:
-          # These will be replaced at build time and not stored in the final build
-          VITE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VITE_RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
+          # The frontend now uses a backend API instead of direct API calls
+          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://your-deployed-api.example.com/api' }}
 
       - name: Create .nojekyll file 📄
         run: |
